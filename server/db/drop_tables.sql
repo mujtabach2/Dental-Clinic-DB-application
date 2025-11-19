@@ -1,0 +1,16 @@
+PRAGMA foreign_keys = OFF;
+
+DROP TABLE IF EXISTS Financial_Record;
+DROP TABLE IF EXISTS Appointment_Treatment;
+DROP TABLE IF EXISTS Treatment;
+DROP TABLE IF EXISTS Schedule;
+DROP TABLE IF EXISTS Full_Time;
+DROP TABLE IF EXISTS Part_Time;
+DROP TABLE IF EXISTS Billing_Admin;
+DROP TABLE IF EXISTS Dental_Staff;
+DROP TABLE IF EXISTS Secretary;
+DROP TABLE IF EXISTS Employee;
+DROP TABLE IF EXISTS Appointment;
+DROP TABLE IF EXISTS Patient;
+
+PRAGMA foreign_keys = ON;
