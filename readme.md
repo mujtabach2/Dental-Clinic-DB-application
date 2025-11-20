@@ -37,7 +37,8 @@ Start the server
 npm start
 ```
 
-API endpoints
+## API endpoints
+---
 
 Patients
 
