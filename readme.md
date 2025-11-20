@@ -1,10 +1,34 @@
-# Server-side documentation
+# Server-Side Documentation
 
-Installation
+This backend provides a complete standalone database-driven application using **Node.js**, **Express.js**, and **SQLite** (via `better-sqlite3`). It includes:
+
+- Automated database creation  
+- Automated seeding  
+- CRUD operations for all core entities  
+- Advanced reporting queries 
+- Server-side validation
+- A clean REST API structure
+
+The server runs independently and includes all schema definitions and population data.
+
+---
+
+## Requirements
+
+Ensure the following are installed:
+
+- **Node.js 18+**
+- **npm**
+- **SQLite** (no external installation required; bundled via `better-sqlite3`)
+
+---
+
+## Installation
 
 ```bash
 cd server
 npm install
+
 ```
 
 Start the server
