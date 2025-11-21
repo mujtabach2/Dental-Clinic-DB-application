@@ -33,7 +33,7 @@ router.post("/populate", (req, res, next) => {
     
     if (existingPatients.count > 0) {
       console.log("Database already populateed, skipping...");
-      return res.json({ ok: true, action: "already_populateed", message: "Database already contains data" });
+      return res.json({ ok: true, action: "already_populated", message: "Database already contains data" });
     }
     
     runSqlFile("populate_data.sql");

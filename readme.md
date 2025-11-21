@@ -30,10 +30,13 @@ npm install
 
 ```
 
-Populate and Start the server
+Create/Populate/Delete tables
+Start the server
 
 ```bash
-npm populate
+npm run create
+npm run populate
+npm run delete
 npm start
 ```
 
