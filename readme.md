@@ -30,9 +30,10 @@ npm install
 
 ```
 
-Start the server
+Populate and Start the server
 
 ```bash
+npm populate
 npm start
 ```
 
@@ -109,3 +110,11 @@ GET /api/reports/secretaries_working
 GET /api/reports/top3_treatments            
 GET /api/reports/avg_costs             
 ```
+
+Admin
+```text 
+GET /api/admin/populate
+GET /api/admin/create
+GET /api/admin/drop
+```
+

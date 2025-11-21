@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
   "start": "node index.js",
-  "seed": "node scripts/runSql.js db/drop_tables.sql && node scripts/runSql.js db/create_tables.sql && node scripts/runSql.js db/seed_data.sql"
+  "populate": "node scripts/runSql.js db/drop_tables.sql && node scripts/runSql.js db/create_tables.sql && node scripts/runSql.js db/populate_data.sql"
 }, 
   "keywords": [],
   "author": "",

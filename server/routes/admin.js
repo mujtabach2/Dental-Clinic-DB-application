@@ -24,23 +24,23 @@ router.post("/create", (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-router.post("/seed", (req, res, next) => {
+router.post("/populate", (req, res, next) => {
   try {
-    console.log("SEED HIT");
+    console.log("populate HIT");
     
     // Check if data already exists
     const existingPatients = db.prepare("SELECT COUNT(*) as count FROM Patient").get();
     
     if (existingPatients.count > 0) {
-      console.log("Database already seeded, skipping...");
-      return res.json({ ok: true, action: "already_seeded", message: "Database already contains data" });
+      console.log("Database already populateed, skipping...");
+      return res.json({ ok: true, action: "already_populateed", message: "Database already contains data" });
     }
     
-    runSqlFile("seed_data.sql");
-    console.log("SEED COMPLETE"); 
-    res.json({ ok: true, action: "seeded" });
+    runSqlFile("populate_data.sql");
+    console.log("populate COMPLETE"); 
+    res.json({ ok: true, action: "populateed" });
   } catch (err) {
-    console.error("SEED ERROR:", err);
+    console.error("populate ERROR:", err);
     next(err);
   }
 });
