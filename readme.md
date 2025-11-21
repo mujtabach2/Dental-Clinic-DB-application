@@ -113,8 +113,8 @@ GET /api/reports/avg_costs
 
 Admin
 ```text 
-GET /api/admin/populate
-GET /api/admin/create
-GET /api/admin/drop
+POST /api/admin/populate
+POST /api/admin/create
+POST /api/admin/drop
 ```
 
