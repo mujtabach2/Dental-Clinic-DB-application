@@ -39,6 +39,9 @@ npm start
 ## API endpoints
 ---
 
+> **Note:** The database contains additional internal tables created during initialization.  
+> Only the tables listed below are exposed through REST API endpoints.
+
 Patients
 
 ```text
