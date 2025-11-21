@@ -19,7 +19,6 @@ Ensure the following are installed:
 
 - **Node.js 18+**
 - **npm**
-- **SQLite** (no external installation required; bundled via `better-sqlite3`)
 
 ---
 
