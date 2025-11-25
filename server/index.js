@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("express").json;
 
 const db = require("./db"); 
 const patientsRouter = require("./routes/patients");
@@ -14,7 +13,7 @@ const adminRouter = require("./routes/admin");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser());
+app.use(express.json());
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
