@@ -1,0 +1,30 @@
+{
+  "name": "dental-clinic-management-system",
+  "version": "2.0.0",
+  "description": "Professional Dental Clinic Database Management System - A comprehensive solution for managing patients, appointments, treatments, and financial records",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "cd server && npm start",
+    "start": "cd server && npm start",
+    "build": "echo 'Build complete'"
+  },
+  "keywords": [
+    "dental",
+    "clinic",
+    "management",
+    "database",
+    "healthcare",
+    "practice-management"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional Dental Clinic Database Management System - Manage patients, appointments, treatments, and financial records">
+    <meta name="keywords" content="dental, clinic, management, database, appointments, patients">
+    <meta name="author" content="Dental Clinic Management System">
+    <title>Dental Clinic Management System | Professional Practice Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Dental Clinic Management System</h1>
+                <p class="header-subtitle">Professional Practice Management Solution</p>
+            </div>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="patients">Patients</button>
+                <button class="tab-btn" data-tab="appointments">Appointments</button>
+                <button class="tab-btn" data-tab="employees">Staff</button>
+                <button class="tab-btn" data-tab="treatments">Treatments</button>
+                <button class="tab-btn" data-tab="appointment-treatments">Services</button>
+                <button class="tab-btn" data-tab="financial">Financial</button>
+                <button class="tab-btn" data-tab="reports">Reports</button>
+                <button class="tab-btn" data-tab="admin">Admin</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Patients Section -->
+            <section id="patients" class="tab-content active">
+                <div class="section-title">
+                    <h2>Patient Management</h2>
+                    <p class="section-description">Manage patient records, medical history, and contact information</p>
+                </div>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showPatientForm()">
+                        <span class="btn-icon">+</span> Add New Patient
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadPatients()">
+                        <span class="btn-icon">↻</span> Refresh
+                    </button>
+                </div>
+                
+                <div id="patient-form" class="form-modal" style="display: none;">
+                    <div class="form-content">
+                        <div class="form-header">
+                            <h3 id="patient-form-title">Add Patient</h3>
+                            <button class="form-close" onclick="closePatientForm()">×</button>
+                        </div>
+                        <form id="patientForm" onsubmit="savePatient(event)">
+                            <input type="hidden" id="patient-id">
+                            <div class="form-group">
+                                <label>Patient ID <span class="required">*</span></label>
+                                <input type="text" id="patient-patientID" required placeholder="Enter unique patient ID">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>First Name <span class="required">*</span></label>
+                                    <input type="text" id="patient-pfirst_name" required placeholder="First name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name <span class="required">*</span></label>
+                                    <input type="text" id="patient-plast_name" required placeholder="Last name">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Date of Birth <span class="required">*</span></label>
+                                <input type="date" id="patient-pDOB" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Address <span class="required">*</span></label>
+                                <input type="text" id="patient-paddress" required placeholder="Street address">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Phone <span class="required">*</span></label>
+                                    <input type="tel" id="patient-pphone" required placeholder="(555) 123-4567">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email <span class="required">*</span></label>
+                                    <input type="email" id="patient-pemail" required placeholder="patient@email.com">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Medical History</label>
+                                <textarea id="patient-medical_history" rows="4" placeholder="Enter relevant medical history, allergies, or notes"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Patient</button>
+                                <button type="button" class="btn btn-secondary" onclick="closePatientForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="patients-table" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Date of Birth</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patients-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Appointments Section -->
+            <section id="appointments" class="tab-content">
+                <div class="section-title">
+                    <h2>Appointment Management</h2>
+                    <p class="section-description">Schedule and manage patient appointments</p>
+                </div>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showAppointmentForm()">
+                        <span class="btn-icon">+</span> Schedule Appointment
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadAppointments()">
+                        <span class="btn-icon">↻</span> Refresh
+                    </button>
+                </div>
+                
+                <div id="appointment-form" class="form-modal" style="display: none;">
+                    <div class="form-content">
+                        <div class="form-header">
+                            <h3 id="appointment-form-title">Schedule Appointment</h3>
+                            <button class="form-close" onclick="closeAppointmentForm()">×</button>
+                        </div>
+                        <form id="appointmentForm" onsubmit="saveAppointment(event)">
+                            <input type="hidden" id="appointment-id">
+                            <div class="form-group">
+                                <label>Appointment ID <span class="required">*</span></label>
+                                <input type="text" id="appointment-appointmentID" required placeholder="Unique appointment ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Patient ID <span class="required">*</span></label>
+                                <input type="text" id="appointment-patientID" required placeholder="Enter patient ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Date & Time <span class="required">*</span></label>
+                                <input type="datetime-local" id="appointment-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Status <span class="required">*</span></label>
+                                <select id="appointment-status" required>
+                                    <option value="Scheduled">Scheduled</option>
+                                    <option value="Attended">Attended</option>
+                                    <option value="Missed">Missed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Appointment</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeAppointmentForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="appointments-table" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Date & Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Employees Section -->
+            <section id="employees" class="tab-content">
+                <div class="section-title">
+                    <h2>Staff Management</h2>
+                    <p class="section-description">Manage employee and staff information</p>
+                </div>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showEmployeeForm()">
+                        <span class="btn-icon">+</span> Add Staff Member
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadEmployees()">
+                        <span class="btn-icon">↻</span> Refresh
+                    </button>
+                </div>
+                
+                <div id="employee-form" class="form-modal" style="display: none;">
+                    <div class="form-content">
+                        <div class="form-header">
+                            <h3 id="employee-form-title">Add Staff Member</h3>
+                            <button class="form-close" onclick="closeEmployeeForm()">×</button>
+                        </div>
+                        <form id="employeeForm" onsubmit="saveEmployee(event)">
+                            <input type="hidden" id="employee-id">
+                            <div class="form-group">
+                                <label>Employee ID <span class="required">*</span></label>
+                                <input type="text" id="employee-empID" required placeholder="Unique employee ID">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>First Name <span class="required">*</span></label>
+                                    <input type="text" id="employee-efirst_name" required placeholder="First name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Last Name <span class="required">*</span></label>
+                                    <input type="text" id="employee-elast_name" required placeholder="Last name">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Phone <span class="required">*</span></label>
+                                    <input type="tel" id="employee-ephone_num" required placeholder="(555) 123-4567">
+                                </div>
+                                <div class="form-group">
+                                    <label>Email <span class="required">*</span></label>
+                                    <input type="email" id="employee-eemail" required placeholder="employee@clinic.com">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Staff Member</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeEmployeeForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="employees-table" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employees-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Treatments Section -->
+            <section id="treatments" class="tab-content">
+                <div class="section-title">
+                    <h2>Treatment Management</h2>
+                    <p class="section-description">Manage available treatments and pricing</p>
+                </div>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showTreatmentForm()">
+                        <span class="btn-icon">+</span> Add Treatment
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadTreatments()">
+                        <span class="btn-icon">↻</span> Refresh
+                    </button>
+                </div>
+                
+                <div id="treatment-form" class="form-modal" style="display: none;">
+                    <div class="form-content">
+                        <div class="form-header">
+                            <h3 id="treatment-form-title">Add Treatment</h3>
+                            <button class="form-close" onclick="closeTreatmentForm()">×</button>
+                        </div>
+                        <form id="treatmentForm" onsubmit="saveTreatment(event)">
+                            <input type="hidden" id="treatment-id">
+                            <div class="form-group">
+                                <label>Treatment ID <span class="required">*</span></label>
+                                <input type="text" id="treatment-treatmentID" required placeholder="Unique treatment ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Treatment Name <span class="required">*</span></label>
+                                <input type="text" id="treatment-treatmentName" required placeholder="e.g., Cleaning, Filling, Extraction">
+                            </div>
+                            <div class="form-group">
+                                <label>Cost <span class="required">*</span></label>
+                                <input type="number" step="0.01" id="treatment-cost" required placeholder="0.00" min="0">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Treatment</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeTreatmentForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="treatments-table" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Treatment Name</th>
+                                <th>Cost</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="treatments-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Appointment Treatments Section -->
+            <section id="appointment-treatments" class="tab-content">
+                <div class="section-title">
+                    <h2>Service Records</h2>
+                    <p class="section-description">Link treatments to appointments</p>
+                </div>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showAppointmentTreatmentForm()">
+                        <span class="btn-icon">+</span> Add Service
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadAppointmentTreatments()">
+                        <span class="btn-icon">↻</span> Refresh
+                    </button>
+                </div>
+                
+                <div id="appointment-treatment-form" class="form-modal" style="display: none;">
+                    <div class="form-content">
+                        <div class="form-header">
+                            <h3 id="appointment-treatment-form-title">Add Service</h3>
+                            <button class="form-close" onclick="closeAppointmentTreatmentForm()">×</button>
+                        </div>
+                        <form id="appointmentTreatmentForm" onsubmit="saveAppointmentTreatment(event)">
+                            <input type="hidden" id="appointment-treatment-id">
+                            <div class="form-group">
+                                <label>Service ID <span class="required">*</span></label>
+                                <input type="text" id="appointment-treatment-apptTreatID" required placeholder="Unique service ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Appointment ID <span class="required">*</span></label>
+                                <input type="text" id="appointment-treatment-appointmentID" required placeholder="Appointment ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Treatment ID <span class="required">*</span></label>
+                                <input type="text" id="appointment-treatment-treatmentID" required placeholder="Treatment ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Quantity <span class="required">*</span></label>
+                                <input type="number" id="appointment-treatment-quantity" value="1" min="1" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Service</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeAppointmentTreatmentForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="appointment-treatments-table" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Appointment</th>
+                                <th>Treatment</th>
+                                <th>Quantity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointment-treatments-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Financial Records Section -->
+            <section id="financial" class="tab-content">
+                <div class="section-title">
+                    <h2>Financial Records</h2>
+                    <p class="section-description">Track billing and payment status</p>
+                </div>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showFinancialForm()">
+                        <span class="btn-icon">+</span> Add Financial Record
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadFinancialRecords()">
+                        <span class="btn-icon">↻</span> Refresh
+                    </button>
+                </div>
+                
+                <div id="financial-form" class="form-modal" style="display: none;">
+                    <div class="form-content">
+                        <div class="form-header">
+                            <h3 id="financial-form-title">Add Financial Record</h3>
+                            <button class="form-close" onclick="closeFinancialForm()">×</button>
+                        </div>
+                        <form id="financialForm" onsubmit="saveFinancialRecord(event)">
+                            <input type="hidden" id="financial-id">
+                            <div class="form-group">
+                                <label>Bill ID <span class="required">*</span></label>
+                                <input type="text" id="financial-financialID" required placeholder="Unique bill ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Service ID <span class="required">*</span></label>
+                                <input type="text" id="financial-apptTreatID" required placeholder="Appointment Treatment ID">
+                            </div>
+                            <div class="form-group">
+                                <label>Amount <span class="required">*</span></label>
+                                <input type="number" step="0.01" id="financial-amount" required placeholder="0.00" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label>Payment Status <span class="required">*</span></label>
+                                <select id="financial-status" required>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Overdue">Overdue</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Record</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeFinancialForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="financial-table" class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bill ID</th>
+                                <th>Service ID</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financial-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="tab-content">
+                <div class="section-title">
+                    <h2>Analytical Reports</h2>
+                    <p class="section-description">Generate comprehensive business intelligence reports</p>
+                </div>
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <div class="report-icon">📊</div>
+                        <h3>Attended Patients Report</h3>
+                        <p>Patients who attended appointments and never missed any</p>
+                        <button class="btn btn-primary" onclick="loadReport('attended_no_missed', 'report1')">Generate Report</button>
+                        <div id="report1" class="report-result"></div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-icon">📈</div>
+                        <h3>Above Average Appointments</h3>
+                        <p>Patients with appointment counts above clinic average</p>
+                        <button class="btn btn-primary" onclick="loadReport('above_avg_appointments', 'report2')">Generate Report</button>
+                        <div id="report2" class="report-result"></div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-icon">👥</div>
+                        <h3>Unassigned Staff</h3>
+                        <p>Employees not assigned to specific roles</p>
+                        <button class="btn btn-primary" onclick="loadReport('unassigned_employees', 'report3')">Generate Report</button>
+                        <div id="report3" class="report-result"></div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-icon">📅</div>
+                        <h3>Secretary Schedule</h3>
+                        <p>Secretaries working on specific dates</p>
+                        <button class="btn btn-primary" onclick="loadReport('secretaries_working', 'report4')">Generate Report</button>
+                        <div id="report4" class="report-result"></div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-icon">💰</div>
+                        <h3>Top Revenue Treatments</h3>
+                        <p>Top 3 highest earning treatments</p>
+                        <button class="btn btn-primary" onclick="loadReport('top3_treatments', 'report5')">Generate Report</button>
+                        <div id="report5" class="report-result"></div>
+                    </div>
+                    
+                    <div class="report-card">
+                        <div class="report-icon">📉</div>
+                        <h3>Treatment Analytics</h3>
+                        <p>Average costs and payment status by treatment</p>
+                        <button class="btn btn-primary" onclick="loadReport('avg_costs', 'report6')">Generate Report</button>
+                        <div id="report6" class="report-result"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Section -->
+            <section id="admin" class="tab-content">
+                <div class="section-title">
+                    <h2>Database Administration</h2>
+                    <p class="section-description">Manage database initialization and maintenance</p>
+                </div>
+                <div class="admin-actions">
+                    <div class="admin-card">
+                        <div class="admin-icon">🗄️</div>
+                        <h3>Initialize Database</h3>
+                        <p>Create all required database tables</p>
+                        <button class="btn btn-primary" onclick="adminAction('create')">Create Tables</button>
+                    </div>
+                    <div class="admin-card">
+                        <div class="admin-icon">📥</div>
+                        <h3>Seed Data</h3>
+                        <p>Populate database with sample data</p>
+                        <button class="btn btn-primary" onclick="adminAction('populate')">Populate Data</button>
+                    </div>
+                    <div class="admin-card danger">
+                        <div class="admin-icon">⚠️</div>
+                        <h3>Reset Database</h3>
+                        <p>Warning: This will delete all tables and data. This action cannot be undone.</p>
+                        <button class="btn btn-danger" onclick="adminAction('drop')">Drop All Tables</button>
+                    </div>
+                </div>
+                <div id="admin-message" class="message"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
