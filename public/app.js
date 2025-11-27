@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:3001/';
+// Use relative path for Vercel, absolute for local development
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3001/' : '/';
 
 // Login check + tab switching
 document.addEventListener('DOMContentLoaded', async () => {
@@ -70,9 +71,11 @@ function showApp(user) {
   const header = document.querySelector('header .header-content');
   const userInfo = document.createElement('div');
   userInfo.className = 'user-info';
+  const roles = user.roles || [];
+  const isAdmin = user.isAdmin === true || user.empID === 999;
   userInfo.innerHTML = `
     Logged in as <strong>${user.efirst_name} ${user.elast_name}</strong>
-    ${user.roles.length ? '(' + user.roles.join(', ') + ')' : '(Admin)'}
+    ${isAdmin ? '(Admin)' : (roles.length ? '(' + roles.join(', ') + ')' : '(User)')}
     <button class="btn btn-secondary btn-small" onclick="logout()">Logout</button>
   `;
   header.appendChild(userInfo);
@@ -92,7 +95,7 @@ async function logout() {
 
 function hideUnauthorizedTabs(user) {
   const roles = user.roles || [];
-  const isAdmin = user.isAdmin === true;
+  const isAdmin = user.isAdmin === true || user.empID === 999;
 
   if (!isAdmin && !roles.includes('secretary')) {
     hideTab('appointments');

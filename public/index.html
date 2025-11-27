@@ -13,6 +13,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+  <div id="login-screen" class="login-container">
+    <div class="login-box">
+      <h2>Dental Clinic Login</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Employee ID</label>
+          <input type="text" id="login-empID" placeholder="e.g. 999" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="e.g. 999" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+        <div id="login-error" class="message error" style="display:none"></div>
+      </form>
+      <div class="demo-credentials">
+        <small>
+          <strong>Demo Logins:</strong><br>
+          Admin: 999 / 999<br>
+          Secretary: 1 / 1<br>
+          Dental Staff: 3 / 3<br>
+          Billing: 6 / 6
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-container" class="container" style="display:none">
     <div class="container">
         <header>
             <div class="header-content">
@@ -532,6 +560,103 @@
     </div>
 
     <script src="app.js"></script>
-</body>
+    <script>
+      // Check login on load
+      document.addEventListener('DOMContentLoaded', async () => {
+        try {
+          const res = await fetch('/api/me', { credentials: 'include' });
+          if (res.ok) {
+            const user = await res.json();
+            showApp(user);
+          } else {
+            showLogin();
+          }
+        } catch (e) {
+          showLogin();
+        }
+      });
+  
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const empID = document.getElementById('login-empID').value;
+        const password = document.getElementById('login-password').value;
+  
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ empID, password }),
+            credentials: 'include'
+          });
+  
+          const data = await res.json();
+          if (res.ok) {
+            showApp(data.user);
+          } else {
+            document.getElementById('login-error').textContent = data.error;
+            document.getElementById('login-error').style.display = 'block';
+          }
+        } catch (err) {
+          document.getElementById('login-error').textContent = 'Network error';
+          document.getElementById('login-error').style.display = 'block';
+        }
+      });
+  
+      function showApp(user) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        document.body.classList.add('logged-in');
+  
+        // Show user info
+        const header = document.querySelector('header .header-content');
+        const userInfo = document.createElement('div');
+        userInfo.className = 'user-info';
+        const roles = user.roles || [];
+        const isAdmin = user.isAdmin === true || user.empID === 999;
+        userInfo.innerHTML = `
+          Logged in as: <strong>${user.efirst_name} ${user.elast_name}</strong> 
+          (${isAdmin ? 'Admin' : (roles.length ? roles.join(', ') : 'User')}) 
+          <button class="btn btn-secondary btn-small" onclick="logout()">Logout</button>
+        `;
+        header.appendChild(userInfo);
+  
+        // Hide tabs based on role
+        hideUnauthorizedTabs(user);
+      }
+  
+      function showLogin() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+      }
+  
+      async function logout() {
+        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+        location.reload();
+      }
+  
+      function hideUnauthorizedTabs(user) {
+        const roles = user.roles || [];
+        const isAdmin = user.isAdmin === true || user.empID === 999;
+  
+        if (!isAdmin && !roles.includes('secretary')) {
+          hideTab('appointments');
+          hideTab('appointment-treatments');
+        }
+        if (!isAdmin && !roles.includes('billing_admin')) {
+          hideTab('financial');
+        }
+        if (!isAdmin) {
+          hideTab('admin');
+        }
+      }
+  
+      function hideTab(tabName) {
+        const btn = document.querySelector(`[data-tab="${tabName}"]`);
+        const section = document.getElementById(tabName);
+        if (btn) btn.style.display = 'none';
+        if (section) section.style.display = 'none';
+      }
+    </script>
+  </body>
 </html>
 
