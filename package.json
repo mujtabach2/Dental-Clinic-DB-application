@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "cd server && npm start",
     "start": "cd server && npm start",
-    "build": "echo 'Build complete'"
+    "build": "echo 'Build complete'",
+    "format": "prettier --write \"public/**/*.js\" \"api/**/*.js\" \"server/**/*.js\"",
+    "remove-comments": "node remove-comments.js"
   },
   "keywords": [
     "dental",
@@ -28,6 +30,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.1"
   }
 }
-
