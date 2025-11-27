@@ -152,10 +152,18 @@ app.post("/api/login", async (req, res) => {
 
     // Save to session
     req.session.user = fullUser;
-
-    // Send safe user object (no password)
-    const { password: _, ...safeUser } = fullUser;
-    res.json({ message: "Login successful", user: safeUser });
+    
+    // Force session save
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ error: "Session error" });
+      }
+      
+      // Send safe user object (no password)
+      const { password: _, ...safeUser } = fullUser;
+      res.json({ message: "Login successful", user: safeUser });
+    });
 
   } catch (err) {
     console.error("Login error:", err);

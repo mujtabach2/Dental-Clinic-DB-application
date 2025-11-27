@@ -15,8 +15,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production', // set true if using HTTPS
+    secure: false, // Disable for demo - set true in production with HTTPS
     httpOnly: true, // Prevent XSS attacks
+    sameSite: 'lax', // Help with CORS
     maxAge: 24 * 60 * 60 * 1000 // 1 day
   }
 }));
@@ -110,6 +111,7 @@ initializeDatabaseIfNeeded();
 
 // ====== AUTH MIDDLEWARE ======
 function requireLogin(req, res, next) {
+  console.log("Auth check:", req.path, req.sessionID, req.session.user ? "authenticated" : "not authenticated");
   if (!req.session.user) {
     return res.status(401).json({ error: "Unauthorized: Please log in" });
   }
@@ -200,10 +202,18 @@ app.post("/api/login", async (req, res) => {
 
     // Save to session
     req.session.user = fullUser;
-
-    // Send safe user object (no password)
-    const { password: _, ...safeUser } = fullUser;
-    res.json({ message: "Login successful", user: safeUser });
+    
+    // Force session save
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({ error: "Session error" });
+      }
+      
+      // Send safe user object (no password)
+      const { password: _, ...safeUser } = fullUser;
+      res.json({ message: "Login successful", user: safeUser });
+    });
 
   } catch (err) {
     console.error("Login error:", err);
@@ -217,6 +227,7 @@ app.post("/api/logout", (req, res) => {
 });
 
 app.get("/api/me", (req, res) => {
+  console.log("Session check:", req.sessionID, req.session.user ? "has user" : "no user");
   if (!req.session.user) {
     return res.status(401).json({ error: "Not logged in" });
   }
