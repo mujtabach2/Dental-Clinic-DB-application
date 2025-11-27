@@ -69,6 +69,13 @@ function showApp(user) {
   document.getElementById('app-container').style.display = 'block';
 
   const header = document.querySelector('header .header-content');
+  
+  // Remove existing user-info if present to prevent duplicates
+  const existingUserInfo = header.querySelector('.user-info');
+  if (existingUserInfo) {
+    existingUserInfo.remove();
+  }
+  
   const userInfo = document.createElement('div');
   userInfo.className = 'user-info';
   const roles = user.roles || [];
@@ -139,7 +146,22 @@ async function apiCall(endpoint, method = 'GET', data = null) {
             options.body = JSON.stringify(data);
         }
         
-        const url = `${API_BASE}${endpoint}`;
+        // Ensure endpoint includes /api prefix
+        let normalizedEndpoint = endpoint;
+        if (!normalizedEndpoint.startsWith('/api/')) {
+            normalizedEndpoint = normalizedEndpoint.startsWith('/') 
+                ? '/api' + normalizedEndpoint 
+                : '/api/' + normalizedEndpoint;
+        }
+        // Build URL - handle both absolute (localhost) and relative (Vercel) paths
+        let url;
+        if (API_BASE === '/') {
+            // Relative path for Vercel
+            url = normalizedEndpoint;
+        } else {
+            // Absolute path for localhost - remove leading slash from endpoint to avoid double slash
+            url = API_BASE + (normalizedEndpoint.startsWith('/') ? normalizedEndpoint.slice(1) : normalizedEndpoint);
+        }
         
         const response = await fetch(url, options);
         
