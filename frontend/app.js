@@ -1,10 +1,17 @@
 const API_BASE = '/api';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
-    adminAction('create');
-    adminAction('populate');
+
+    // Initialize database on load
+    try {
+        await initializeDatabase();
+        // Load initial tab data
+        loadTabData('patients');
+    } catch (error) {
+        console.error('Failed to initialize database:', error);
+    }
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -20,8 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
-
 function loadTabData(tab) {
     switch(tab) {
         case 'patients':

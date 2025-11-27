@@ -1,11 +1,18 @@
 // Use relative API path for Vercel deployment
 const API_BASE = '/api';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
-    adminAction('create');
-    adminAction('populate');
+
+    // Initialize database on load
+    try {
+        await initializeDatabase();
+        // Load initial tab data
+        loadTabData('patients');
+    } catch (error) {
+        console.error('Failed to initialize database:', error);
+    }
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -18,13 +25,26 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById(targetTab).classList.add('active');
             
             loadTabData(targetTab);
-
         });
     });
-
-  
 });
 
+
+
+async function initializeDatabase() {
+    try {
+        console.log('Creating tables...');
+        await apiCall('/admin/create', 'POST');
+        console.log('Tables created successfully');
+        
+        console.log('Populating data...');
+        await apiCall('/admin/populate', 'POST');
+        console.log('Data populated successfully');
+    } catch (error) {
+        console.error('Database initialization error:', error);
+        throw error;
+    }
+}
 
 function loadTabData(tab) {
     switch(tab) {
