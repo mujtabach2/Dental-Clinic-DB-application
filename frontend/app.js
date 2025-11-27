@@ -1,3 +1,4 @@
+// Use relative API path for Vercel deployment
 const API_BASE = '/api';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -27,6 +28,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 });
+
+
+
+async function initializeDatabase() {
+    try {
+        console.log('Creating tables...');
+        await apiCall('/admin/create', 'POST');
+        console.log('Tables created successfully');
+        
+        console.log('Populating data...');
+        await apiCall('/admin/populate', 'POST');
+        console.log('Data populated successfully');
+    } catch (error) {
+        console.error('Database initialization error:', error);
+        throw error;
+    }
+}
+
 function loadTabData(tab) {
     switch(tab) {
         case 'patients':
