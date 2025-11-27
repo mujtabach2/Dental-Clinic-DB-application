@@ -33,6 +33,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function initializeDatabase() {
     try {
+        console.log('Dropping existing tables...');
+        try {
+            await apiCall('/admin/drop', 'POST');
+            console.log('Tables dropped successfully');
+        } catch (error) {
+            console.log('No existing tables to drop or drop failed');
+        }
+        
         console.log('Creating tables...');
         await apiCall('/admin/create', 'POST');
         console.log('Tables created successfully');
