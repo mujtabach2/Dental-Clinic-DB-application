@@ -1,7 +1,7 @@
 // Use relative API path for Vercel deployment
 const API_BASE = '/api';
 
-ocument.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
