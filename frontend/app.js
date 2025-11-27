@@ -1,6 +1,7 @@
 // Use relative API path for Vercel deployment
 const API_BASE = '/api';
 
+// Rest of your app.js code...
 // Tab Navigation
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -10,15 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
             const targetTab = btn.getAttribute('data-tab');
             
-            // Remove active class from all buttons and contents
             tabButtons.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
             
-            // Add active class to clicked button and corresponding content
             btn.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
             
-            // Load data when switching tabs
             loadTabData(targetTab);
         });
     });
@@ -64,7 +62,18 @@ async function apiCall(endpoint, method = 'GET', data = null) {
             options.body = JSON.stringify(data);
         }
         
-        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        const url = `${API_BASE}${endpoint}`;
+        
+        const response = await fetch(url, options);
+        
+        // Check content type
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text.substring(0, 200));
+            throw new Error(`Server returned HTML instead of JSON. Endpoint: ${endpoint}\nMake sure the backend server is running on port 3001`);
+        }
+        
         const result = await response.json();
         
         if (!response.ok) {
@@ -78,7 +87,6 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         throw error;
     }
 }
-
 // ========== PATIENTS ==========
 async function loadPatients() {
     try {
