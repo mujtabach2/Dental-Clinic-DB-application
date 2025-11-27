@@ -19,8 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Load initial data
-    loadTabData('patients');
+    Promise.all([
+        loadPatients(),
+        loadAppointments(),
+        loadEmployees(),
+        loadTreatments(),
+        loadAppointmentTreatments(),
+        loadFinancialRecords()
+    ]).catch(console.error);
 });
 
 function loadTabData(tab) {

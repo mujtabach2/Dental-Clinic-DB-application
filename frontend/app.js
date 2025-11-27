@@ -1,4 +1,3 @@
-// Use relative API path for Vercel deployment
 const API_BASE = '/api';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,8 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Load initial data
-    loadTabData('patients');
+    Promise.all([
+        loadPatients(),
+        loadAppointments(),
+        loadEmployees(),
+        loadTreatments(),
+        loadAppointmentTreatments(),
+        loadFinancialRecords()
+    ]).catch(console.error);
 });
 
 function loadTabData(tab) {
