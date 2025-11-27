@@ -3,6 +3,8 @@ const API_BASE = '/api';
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
+    adminAction('create');
+    adminAction('populate')
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -19,13 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-window.addEventListener('load', () => {
-    const msgDiv = document.getElementById('admin-message');
-    if (msgDiv) {
-        adminAction('create');
-        adminAction('populate');
-    }
-});
 
 function loadTabData(tab) {
     switch(tab) {
