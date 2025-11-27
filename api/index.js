@@ -152,21 +152,12 @@ function getUserWithRoles(empID) {
 
 // ====== LOGIN ROUTE ======
 
-app.post("/api/login", loginLimiter, async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { empID, password } = req.body;
 
-  // Input validation
+  // Simple validation
   if (!empID || !password) {
     return res.status(400).json({ error: "Employee ID and password are required" });
-  }
-
-  // Validate input types
-  if (!validateInput(empID, 'integer')) {
-    return res.status(400).json({ error: "Invalid Employee ID format" });
-  }
-
-  if (!validateInput(password, 'string') || password.length < 3) {
-    return res.status(400).json({ error: "Password must be at least 3 characters" });
   }
 
   try {
@@ -196,33 +187,11 @@ app.post("/api/login", loginLimiter, async (req, res) => {
     `).get(empIDNum);
 
     if (!user) {
-      // Use same error message to prevent user enumeration
       return res.status(401).json({ error: "Invalid Employee ID or password" });
     }
 
-    // Verify password using bcrypt
-    let passwordMatch = false;
-    try {
-      // Check if password is already hashed (starts with $2a$, $2b$, or $2y$)
-      if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$'))) {
-        passwordMatch = await bcrypt.compare(password, user.password);
-      } else {
-        // Legacy plain text password support (for migration period)
-        // In production, remove this fallback after all passwords are migrated
-        passwordMatch = user.password === password;
-        
-        // If plain text matches, hash it and update the database
-        if (passwordMatch) {
-          const hashedPassword = await bcrypt.hash(password, 10);
-          db.prepare(`UPDATE Employee SET password = ? WHERE empID = ?`).run(hashedPassword, empIDNum);
-        }
-      }
-    } catch (bcryptError) {
-      console.error("Password comparison error:", bcryptError);
-      return res.status(500).json({ error: "Authentication error" });
-    }
-
-    if (!passwordMatch) {
+    // Simple plain text password check (for demo)
+    if (user.password !== password) {
       return res.status(401).json({ error: "Invalid Employee ID or password" });
     }
 

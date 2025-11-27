@@ -155,12 +155,13 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         }
         // Build URL - handle both absolute (localhost) and relative (Vercel) paths
         let url;
-        if (API_BASE === '/') {
-            // Relative path for Vercel
-            url = normalizedEndpoint;
+        if (API_BASE === '/' || API_BASE.endsWith('/')) {
+            // Relative path for Vercel or if API_BASE ends with /
+            const base = API_BASE === '/' ? '' : API_BASE.replace(/\/$/, '');
+            url = base + normalizedEndpoint;
         } else {
-            // Absolute path for localhost - remove leading slash from endpoint to avoid double slash
-            url = API_BASE + (normalizedEndpoint.startsWith('/') ? normalizedEndpoint.slice(1) : normalizedEndpoint);
+            // Absolute path for localhost
+            url = API_BASE.replace(/\/$/, '') + normalizedEndpoint;
         }
         
         const response = await fetch(url, options);
