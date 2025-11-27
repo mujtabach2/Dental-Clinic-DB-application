@@ -1,123 +1,134 @@
-# Server-Side Documentation
+# 🦷 Dental Clinic Management System
 
-This backend provides a complete standalone database-driven application using **Node.js**, **Express.js**, and **SQLite** (via `better-sqlite3`). It includes:
+A comprehensive, full-stack web application for managing dental clinic operations including patient records, appointments, staff management, treatments, and financial tracking.
 
-- Automated database creation  
-- Automated seeding  
-- CRUD operations for all core entities  
-- Advanced reporting queries 
-- Server-side validation
-- A clean REST API structure
+## ✨ Features
 
-The server runs independently and includes all schema definitions and population data.
+- **Patient Management** - Complete CRUD operations for patient records with medical history
+- **Appointment Scheduling** - Book, track, and manage patient appointments
+- **Staff Management** - Manage employees, dentists, secretaries, and billing admins
+- **Treatment Catalog** - Define and price dental treatments
+- **Service Records** - Link treatments to appointments with quantity tracking
+- **Financial Tracking** - Monitor billing, payments, and outstanding balances
+- **Advanced Reports**
+  - Generate analytical insights:
+  - Patients who never missed appointments
+  - Above-average appointment frequency
+  - Unassigned staff members
+  - Secretary schedules
+  - Top revenue-generating treatments
+  - Average treatment costs by payment status
+- **Database Administration** - Initialize, populate, and reset database with one click
 
----
+## 🚀 Live Demo
 
-## Requirements
+**Deployed on Vercel**: https://dental-clinic-db-application-90j6r3kjy-mujtabach2s-projects.vercel.app/
 
-Ensure the following are installed:
+## 🏗️ Tech Stack
 
-- **Node.js 18+**
-- **npm**
+### Frontend
+- **HTML5** - Semantic markup
+- **CSS3** - Modern responsive design with gradients and animations
+- **Vanilla JavaScript** - No framework dependencies
+- **Fetch API** - RESTful API communication
 
----
+### Backend
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **better-sqlite3** - Fast, synchronous SQLite database
+- **CORS** - Cross-origin resource sharing
 
-## Installation
+### Deployment
+- **Vercel** - Serverless deployment platform
+- **Serverless Functions** - API endpoints as serverless functions
 
-```bash
-cd server
-npm install
+## 📖 Usage Guide
 
-```
+### First Time Setup
 
-Create/Populate/Delete tables
-Start the server
+1. **Initialize Database**
+   - Go to Admin tab
+   - Click "Create Tables"
+   - Wait for success message
 
-```bash
-npm run create
-npm run populate
-npm run delete
-npm start
-```
+2. **Add Sample Data** 
+   - Click "Populate Data"
+   - This adds 5 patients, 7 appointments, 8 employees, 5 treatments, and financial records
 
-## API endpoints
----
+### Managing Patients
 
-> **Note:** The database contains additional internal tables created during initialization.  
-> Only the tables listed below are exposed through REST API endpoints.
+1. Click **"Patients"** tab
+2. Click **"+ Add New Patient"**
+3. Fill in patient information:
+   - Patient ID (unique identifier)
+   - Name, DOB, Address
+   - Contact information
+   - Medical history
+4. Click **"Save Patient"**
 
-Patients
+To edit or delete, use the action buttons in the table.
 
-```text
-GET    /api/patients
-GET    /api/patients/:id
-POST   /api/patients
-PUT    /api/patients/:id
-DELETE /api/patients/:id
-```
+### Scheduling Appointments
 
-Appointments
+1. Click **"Appointments"** tab
+2. Click **"+ Schedule Appointment"**
+3. Enter:
+   - Appointment ID
+   - Patient ID (must exist)
+   - Date & Time
+   - Status (Scheduled/Attended/Missed/Cancelled)
+4. Click **"Save Appointment"**
 
-```text
-GET    /api/appointments
-GET    /api/appointments/:id
-POST   /api/appointments
-PUT    /api/appointments/:id
-DELETE /api/appointments/:id
-```
+### Managing Staff
 
-Employees
+1. Click **"Staff"** tab
+2. Click **"+ Add Staff Member"**
+3. Enter employee details
+4. Assign roles via database (Secretary, Dental Staff, Billing Admin)
 
-```text
-GET    /api/employees
-GET    /api/employees/:id
-POST   /api/employees
-PUT    /api/employees/:id
-DELETE /api/employees/:id
-```
+### Adding Treatments
 
-Treatments
+1. Click **"Treatments"** tab
+2. Click **"+ Add Treatment"**
+3. Define treatment name and cost
+4. Save to catalog
 
-```text
-GET    /api/treatments
-POST   /api/treatments
-PUT    /api/treatments/:id
-DELETE /api/treatments/:id
-```
+### Recording Services
 
-Appointment_Treatment
+1. Click **"Services"** tab
+2. Link treatments to appointments
+3. Specify quantity of each treatment
 
-```text
-GET    /api/appointment_treatments
-POST   /api/appointment_treatments
-PUT    /api/appointment_treatments/:id
-DELETE /api/appointment_treatments/:id
-```
+### Financial Management
 
-Financial Records
+1. Click **"Financial"** tab
+2. Track billing records
+3. Monitor payment status (Paid/Pending/Overdue)
+4. View amounts owed
 
-```text
-GET    /api/financial_records
-POST   /api/financial_records
-PUT    /api/financial_records/:id
-DELETE /api/financial_records/:id
-```
+### Generating Reports
 
-Advanced Reports
+1. Click **"Reports"** tab
+2. Choose from 6 analytical reports
+3. Click **"Generate Report"**
+4. View results in table format
 
-```text
-GET /api/reports/attended_no_missed         
-GET /api/reports/above_avg_appointments     
-GET /api/reports/unassigned_employees    
-GET /api/reports/secretaries_working  
-GET /api/reports/top3_treatments            
-GET /api/reports/avg_costs             
-```
+## 🗄️ Database Schema
 
-Admin
-```text 
-POST /api/admin/populate
-POST /api/admin/create
-POST /api/admin/drop
-```
+### Core Tables
 
+- **Patient** - Patient demographic and medical information
+- **Appointment** - Scheduled visits with status tracking
+- **Employee** - Staff member information
+- **Treatment** - Available treatments and pricing
+- **Appointment_Treatment** - Links treatments to appointments
+- **Financial_Record** - Billing and payment tracking
+
+### Supporting Tables
+
+- **Secretary** - Front desk staff
+- **Dental_Staff** - Dentists and hygienists
+- **Billing_Admin** - Billing administrators
+- **Part_Time** - Hourly wage employees
+- **Full_Time** - Salaried employees
+- **Schedule** - Employee work schedules
