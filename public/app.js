@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
     adminAction('create');
-    adminAction('populate')
+    adminAction('populate');
 
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
