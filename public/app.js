@@ -19,14 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    Promise.all([
-        loadPatients(),
-        loadAppointments(),
-        loadEmployees(),
-        loadTreatments(),
-        loadAppointmentTreatments(),
-        loadFinancialRecords()
-    ]).catch(console.error);
+  
+    adminAction('create');
+    adminAction('populate');
 });
 
 function loadTabData(tab) {
