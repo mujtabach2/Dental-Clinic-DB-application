@@ -19,15 +19,19 @@ INSERT INTO Appointment VALUES
 (7,1,'2025-11-01','Upcoming');
 
 -- Employee Table
+-- Note: Passwords are set to empID by default (e.g., employee 1 has password "1")
+-- Run the migrate-passwords script after populating to hash all passwords
+-- Admin user: empID 999, password "999"
 INSERT INTO Employee VALUES
-(1,'Sarah','Johnson','4165550101','sarah.johnson@dentalclinic.com'),
-(2,'Michael','Chen','4165550102','michael.chen@dentalclinic.com'),
-(3,'Emily','Rodriguez','6475550103','emily.rodriguez@dentalclinic.com'),
-(4,'David','Thompson','6475550104','david.thompson@dentalclinic.com'),
-(5,'Lisa','Park','9055550105','lisa.park@dentalclinic.com'),
-(6,'James','Wilson','9055550106','james.wilson@dentalclinic.com'),
-(7,'Maria','Garcia','4375550107','maria.garcia@dentalclinic.com'),
-(8,'Robert','Brown','4375550108','robert.brown@dentalclinic.com');
+(1,'Sarah','Johnson','4165550101','sarah.johnson@dentalclinic.com','1'),
+(2,'Michael','Chen','4165550102','michael.chen@dentalclinic.com','2'),
+(3,'Emily','Rodriguez','6475550103','emily.rodriguez@dentalclinic.com','3'),
+(4,'David','Thompson','6475550104','david.thompson@dentalclinic.com','4'),
+(5,'Lisa','Park','9055550105','lisa.park@dentalclinic.com','5'),
+(6,'James','Wilson','9055550106','james.wilson@dentalclinic.com','6'),
+(7,'Maria','Garcia','4375550107','maria.garcia@dentalclinic.com','7'),
+(8,'Robert','Brown','4375550108','robert.brown@dentalclinic.com','8'),
+(999,'Admin','User','0000000000','admin@dentalclinic.com','999');
 
 -- Secretary Table
 INSERT INTO Secretary VALUES

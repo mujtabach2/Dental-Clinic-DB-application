@@ -1,80 +1,124 @@
-// Use relative API path for Vercel deployment
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:3001/';
 
+// Login check + tab switching
 document.addEventListener('DOMContentLoaded', async () => {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-    // Initialize database on load
-    try {
-        await initializeDatabase();
-        // Load initial tab data
-        loadTabData('patients');
-    } catch (error) {
-        console.error('Failed to initialize database:', error);
+  // Check if already logged in
+  try {
+    const res = await fetch(`${API_BASE}api/me`, { credentials: 'include' });
+    if (res.ok) {
+      const user = await res.json();
+      showApp(user);
+      loadTabData('patients');
+      setupTabs();
+      return;
     }
+  } catch (e) { /* not logged in */ }
 
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetTab = btn.getAttribute('data-tab');
-            
-            tabButtons.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            
-            btn.classList.add('active');
-            document.getElementById(targetTab).classList.add('active');
-            
-            loadTabData(targetTab);
-        });
-    });
+  showLogin();
+  setupTabs();
 });
 
-
-
-async function initializeDatabase() {
-    try {
-        console.log('Dropping existing tables...');
-        try {
-            await apiCall('/admin/drop', 'POST');
-            console.log('Tables dropped successfully');
-        } catch (error) {
-            console.log('No existing tables to drop or drop failed');
-        }
-        
-        console.log('Creating tables...');
-        await apiCall('/admin/create', 'POST');
-        console.log('Tables created successfully');
-        
-        console.log('Populating data...');
-        await apiCall('/admin/populate', 'POST');
-        console.log('Data populated successfully');
-    } catch (error) {
-        console.error('Database initialization error:', error);
-        throw error;
-    }
+function setupTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+      loadTabData(btn.dataset.tab);
+    });
+  });
 }
 
-function loadTabData(tab) {
-    switch(tab) {
-        case 'patients':
-            loadPatients();
-            break;
-        case 'appointments':
-            loadAppointments();
-            break;
-        case 'employees':
-            loadEmployees();
-            break;
-        case 'treatments':
-            loadTreatments();
-            break;
-        case 'appointment-treatments':
-            loadAppointmentTreatments();
-            break;
-        case 'financial':
-            loadFinancialRecords();
-            break;
+// Login form
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const empID = document.getElementById('login-empID').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  fetch(`${API_BASE}api/login`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ empID, password })
+  })
+  .then(res => res.json().then(data => ({ok: res.ok, data})))
+  .then(({ok, data}) => {
+    if (ok) {
+      showApp(data.user);
+      loadTabData('patients');
+    } else {
+      document.getElementById('login-error').textContent = data.error || 'Login failed';
+      document.getElementById('login-error').style.display = 'block';
     }
+  })
+  .catch(() => {
+    document.getElementById('login-error').textContent = 'Network error';
+    document.getElementById('login-error').style.display = 'block';
+  });
+});
+
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-container').style.display = 'block';
+
+  const header = document.querySelector('header .header-content');
+  const userInfo = document.createElement('div');
+  userInfo.className = 'user-info';
+  userInfo.innerHTML = `
+    Logged in as <strong>${user.efirst_name} ${user.elast_name}</strong>
+    ${user.roles.length ? '(' + user.roles.join(', ') + ')' : '(Admin)'}
+    <button class="btn btn-secondary btn-small" onclick="logout()">Logout</button>
+  `;
+  header.appendChild(userInfo);
+
+  hideUnauthorizedTabs(user);
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-container').style.display = 'none';
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  location.reload();
+}
+
+function hideUnauthorizedTabs(user) {
+  const roles = user.roles || [];
+  const isAdmin = user.isAdmin === true;
+
+  if (!isAdmin && !roles.includes('secretary')) {
+    hideTab('appointments');
+    hideTab('appointment-treatments');
+  }
+  if (!isAdmin && !roles.includes('billing_admin')) hideTab('financial');
+  if (!isAdmin) hideTab('admin');
+}
+
+function hideTab(tab) {
+  const btn = document.querySelector(`[data-tab="${tab}"]`);
+  const sec = document.getElementById(tab);
+  if (btn) btn.style.display = 'none';
+  if (sec) sec.style.display = 'none';
+}
+
+// Your existing functions below (patients, appointments, etc.) stay exactly the same
+function loadTabData(tab) {
+  switch(tab) {
+    case 'patients': loadPatients(); break;
+    case 'appointments': loadAppointments(); break;
+    case 'employees': loadEmployees(); break;
+    case 'treatments': loadTreatments(); break;
+    case 'appointment-treatments': loadAppointmentTreatments(); break;
+    case 'financial': loadFinancialRecords(); break;
+  }
 }
 
 // API Helper Functions
@@ -82,6 +126,7 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     try {
         const options = {
             method,
+            credentials: 'include', // Include cookies for session management
             headers: {
                 'Content-Type': 'application/json',
             }
@@ -805,4 +850,3 @@ async function adminAction(action) {
         messageDiv.textContent = `Error: ${error.message}`;
     }
 }
-

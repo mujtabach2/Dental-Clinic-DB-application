@@ -1,110 +1,262 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const session = require("express-session");
 const Database = require("better-sqlite3");
+const bcrypt = require("bcrypt");
+const rateLimit = require("express-rate-limit");
 
+const app = express();
 
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+// Session middleware (critical for login state)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'dental-clinic-super-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production', // set true if using HTTPS
+    httpOnly: true, // Prevent XSS attacks
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+  }
+}));
+
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
+
+// Rate limiting for login attempts
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login requests per windowMs
+  message: { error: "Too many login attempts, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Input validation helper
+function validateInput(input, type = 'string') {
+  if (input === null || input === undefined) return false;
+  
+  if (type === 'string') {
+    return typeof input === 'string' && input.trim().length > 0 && input.length <= 255;
+  } else if (type === 'integer') {
+    const num = parseInt(input, 10);
+    return !isNaN(num) && num > 0;
+  } else if (type === 'email') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return typeof input === 'string' && emailRegex.test(input);
+  }
+  return false;
+}
+
+// Database setup (same as before)
 const dbPath = process.env.VERCEL || process.env.VERCEL_ENV
   ? path.join("/tmp", "dental.db")
-  : path.join(__dirname, "../server/db/a9.db");
+  : path.join(__dirname, "./db/a9.db");
 
 let db;
 try {
   db = new Database(dbPath);
   db.pragma("foreign_keys = ON");
-  
-
-  const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='Patient'").get();
-  
-
-  if (!tableCheck) {
-    console.log("Tables not found, initializing database...");
-    const fs = require("fs");
-    const createTablesPath = path.join(__dirname, "../server/db/create_tables.sql");
-    if (fs.existsSync(createTablesPath)) {
-      const sql = fs.readFileSync(createTablesPath, "utf8");
-      try {
-        db.exec(sql);
-        console.log("Database tables created successfully");
-      } catch (e) {
-        console.error("Error creating tables:", e);
-      }
-    }
-  }
 } catch (err) {
   console.error("Database connection error:", err);
   db = new Database(dbPath);
   db.pragma("foreign_keys = ON");
 }
-
 global.db = db;
 
-const app = express();
-
-
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type']
-}));
-
-app.use(express.json());
-
-// Health check endpoint (should come before other routes)
-app.get("/api/health", (req, res) => {
-  try {
-    // Test database connection
-    const result = db.prepare("SELECT 1 as test").get();
-    res.json({ status: "ok", database: "connected", test: result });
-  } catch (err) {
-    console.error("Health check failed:", err);
-    res.status(500).json({ status: "error", error: err.message });
+// ====== AUTH MIDDLEWARE ======
+function requireLogin(req, res, next) {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Unauthorized: Please log in" });
   }
-});
-
-try {
-  const patientsRouter = require("../server/routes/patients");
-  const appointmentsRouter = require("../server/routes/appointments");
-  const employeesRouter = require("../server/routes/employees");
-  const treatmentsRouter = require("../server/routes/treatments");
-  const apptTreatRouter = require("../server/routes/appointment_treatments");
-  const financialRouter = require("../server/routes/financial_records");
-  const reportsRouter = require("../server/routes/reports");
-  const adminRouter = require("../server/routes/admin");
-
-  app.use("/api/patients", patientsRouter);
-  app.use("/api/appointments", appointmentsRouter);
-  app.use("/api/employees", employeesRouter);
-  app.use("/api/treatments", treatmentsRouter);
-  app.use("/api/appointment_treatments", apptTreatRouter);
-  app.use("/api/financial_records", financialRouter);
-  app.use("/api/reports", reportsRouter);
-  app.use("/api/admin", adminRouter);
-} catch (err) {
-  console.error("Error loading routes:", err);
+  next();
 }
 
-app.use("/api/*", (req, res) => {
-  res.status(404).json({ 
-    error: "API endpoint not found", 
-    path: req.path,
-    method: req.method 
-  });
-});
-app.use((err, req, res, next) => {
-  console.error("Error:", err && err.stack ? err.stack : err);
-  
-  if (req.path.startsWith('/api/')) {
-    return res.status(err.status || 500).json({ 
-      error: err.message || "Internal Server Error",
-      path: req.path,
-      method: req.method
-    });
+function requireRole(allowedRoles) {
+  return (req, res, next) => {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const user = req.session.user;
+    const hasRole = allowedRoles.some(role => 
+      user.roles.includes(role) || user.isAdmin
+    );
+
+    if (!hasRole) {
+      return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+    }
+    next();
+  };
+}
+
+// Helper: Get full user with roles
+function getUserWithRoles(empID) {
+  const user = db.prepare(`SELECT * FROM Employee WHERE empID = ?`).get(empID);
+  if (!user) return null;
+
+  const roles = [];
+
+  if (db.prepare(`SELECT 1 FROM Secretary WHERE empID = ?`).get(empID)) roles.push('secretary');
+  if (db.prepare(`SELECT 1 FROM Dental_Staff WHERE empID = ?`).get(empID)) roles.push('dental_staff');
+  if (db.prepare(`SELECT 1 FROM Billing_Admin WHERE empID = ?`).get(empID)) roles.push('billing_admin');
+
+  const isAdmin = empID === 999;
+
+  return { ...user, roles, isAdmin };
+}
+
+// ====== LOGIN ROUTE ======
+
+app.post("/api/login", loginLimiter, async (req, res) => {
+  const { empID, password } = req.body;
+
+  // Input validation
+  if (!empID || !password) {
+    return res.status(400).json({ error: "Employee ID and password are required" });
   }
 
-  res.status(err.status || 500).json({ 
-    error: err.message || "Internal Server Error" 
-  });
+  // Validate input types
+  if (!validateInput(empID, 'integer')) {
+    return res.status(400).json({ error: "Invalid Employee ID format" });
+  }
+
+  if (!validateInput(password, 'string') || password.length < 3) {
+    return res.status(400).json({ error: "Password must be at least 3 characters" });
+  }
+
+  try {
+    // Convert to integer
+    const empIDNum = parseInt(empID, 10);
+    if (isNaN(empIDNum) || empIDNum <= 0) {
+      return res.status(400).json({ error: "Invalid Employee ID" });
+    }
+
+    // Get user from database
+    const user = db.prepare(`
+      SELECT empID, password, efirst_name, elast_name, ephone_num, eemail
+      FROM Employee 
+      WHERE empID = ?
+    `).get(empIDNum);
+
+    if (!user) {
+      // Use same error message to prevent user enumeration
+      return res.status(401).json({ error: "Invalid Employee ID or password" });
+    }
+
+    // Verify password using bcrypt
+    let passwordMatch = false;
+    try {
+      // Check if password is already hashed (starts with $2a$, $2b$, or $2y$)
+      if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$'))) {
+        passwordMatch = await bcrypt.compare(password, user.password);
+      } else {
+        // Legacy plain text password support (for migration period)
+        // In production, remove this fallback after all passwords are migrated
+        passwordMatch = user.password === password;
+        
+        // If plain text matches, hash it and update the database
+        if (passwordMatch) {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          db.prepare(`UPDATE Employee SET password = ? WHERE empID = ?`).run(hashedPassword, empIDNum);
+        }
+      }
+    } catch (bcryptError) {
+      console.error("Password comparison error:", bcryptError);
+      return res.status(500).json({ error: "Authentication error" });
+    }
+
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid Employee ID or password" });
+    }
+
+    // Build roles
+    const fullUser = getUserWithRoles(empIDNum);
+
+    // Save to session
+    req.session.user = fullUser;
+
+    // Send safe user object (no password)
+    const { password: _, ...safeUser } = fullUser;
+    res.json({ message: "Login successful", user: safeUser });
+
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Server error – please try again later" });
+  }
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy();
+  res.json({ message: "Logged out" });
+});
+
+app.get("/api/me", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+  const { password: _, ...safeUser } = req.session.user;
+  res.json(safeUser);
+});
+
+// ====== PROTECTED ROUTES ======
+// Apply login requirement to all API routes except login/health
+app.use("/api", (req, res, next) => {
+  if (req.path === '/login' || req.path.startsWith('/health')) {
+    return next();
+  }
+  requireLogin(req, res, next);
+});
+
+// Role-based route protection
+const adminOnly = requireRole(['admin']);
+const secretaryOnly = requireRole(['secretary']);
+const dentalOnly = requireRole(['dental_staff']);
+const billingOnly = requireRole(['billing_admin']);
+
+// Or combine roles
+const secretaryOrAdmin = requireRole(['secretary', 'admin']);
+const dentalOrAdmin = requireRole(['dental_staff', 'admin']);
+const billingOrAdmin = requireRole(['billing_admin', 'admin']);
+
+// Import routes (you already have these)
+const patientsRouter = require("./routes/patients");
+const appointmentsRouter = require("./routes/appointments");
+const employeesRouter = require("./routes/employees");
+const treatmentsRouter = require("./routes/treatments");
+const apptTreatRouter = require("./routes/appointment_treatments");
+const financialRouter = require("./routes/financial_records");
+const reportsRouter = require("./routes/reports");
+const adminRouter = require("./routes/admin");
+
+// Apply role restrictions
+app.use("/api/patients", patientsRouter); // Everyone can see patients
+app.use("/api/appointments", secretaryOrAdmin, appointmentsRouter);
+app.use("/api/employees", requireLogin, employeesRouter); // Only logged-in
+app.use("/api/treatments", requireLogin, treatmentsRouter);
+app.use("/api/appointment_treatments", secretaryOrAdmin, apptTreatRouter);
+app.use("/api/financial_records", billingOrAdmin, financialRouter);
+app.use("/api/reports", requireLogin, reportsRouter); // Reports visible to all logged in
+app.use("/api/admin", (req, res, next) => {
+  if (!req.session.user || req.session.user.empID !== 999) {
+    return res.status(403).json({ error: "Only Admin (ID: 999) can access this" });
+  }
+  next();
+}, adminRouter);
+
+app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: err.message || "Server Error" });
 });
 
 module.exports = app;

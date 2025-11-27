@@ -6,17 +6,20 @@
     "start": "node index.js",
     "create": "node scripts/runSql.js db/create_tables.sql",
     "drop": "node scripts/runSql.js db/drop_tables.sql",
-    "populate": "node scripts/runSql.js db/populate_data.sql"
+    "populate": "node scripts/runSql.js db/populate_data.sql",
+    "migrate-passwords": "node scripts/migrate_passwords.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "better-sqlite3": "^12.4.1",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
+    "express-session": "^1.18.2"
   },
-  "devDependencies": {},
   "description": ""
 }

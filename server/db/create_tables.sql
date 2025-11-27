@@ -47,7 +47,8 @@ CREATE TABLE Employee (
     efirst_name TEXT NOT NULL,
     elast_name TEXT NOT NULL,
     ephone_num TEXT NOT NULL,
-    eemail TEXT NOT NULL
+    eemail TEXT NOT NULL,
+    password TEXT NOT NULL
 );
 
 CREATE TABLE Secretary (
