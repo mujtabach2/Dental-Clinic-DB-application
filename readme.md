@@ -112,23 +112,3 @@ To edit or delete, use the action buttons in the table.
 2. Choose from 6 analytical reports
 3. Click **"Generate Report"**
 4. View results in table format
-
-## 🗄️ Database Schema
-
-### Core Tables
-
-- **Patient** - Patient demographic and medical information
-- **Appointment** - Scheduled visits with status tracking
-- **Employee** - Staff member information
-- **Treatment** - Available treatments and pricing
-- **Appointment_Treatment** - Links treatments to appointments
-- **Financial_Record** - Billing and payment tracking
-
-### Supporting Tables
-
-- **Secretary** - Front desk staff
-- **Dental_Staff** - Dentists and hygienists
-- **Billing_Admin** - Billing administrators
-- **Part_Time** - Hourly wage employees
-- **Full_Time** - Salaried employees
-- **Schedule** - Employee work schedules
