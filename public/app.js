@@ -20,10 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   
-    adminAction('create');
-    adminAction('populate');
 });
 
+window.addEventListener('load', () => {
+    const msgDiv = document.getElementById('admin-message');
+    if (msgDiv) {
+        adminAction('create');
+        adminAction('populate');
+    }
+});
 function loadTabData(tab) {
     switch(tab) {
         case 'patients':
