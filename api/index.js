@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const session = require("express-session");
 const Database = require("better-sqlite3");
 const bcrypt = require("bcrypt");
@@ -66,6 +67,46 @@ try {
   db.pragma("foreign_keys = ON");
 }
 global.db = db;
+
+// Auto-initialize database if tables don't exist
+function initializeDatabaseIfNeeded() {
+  try {
+    // Check if Employee table exists
+    const tableCheck = db.prepare(`
+      SELECT name FROM sqlite_master 
+      WHERE type='table' AND name='Employee'
+    `).get();
+    
+    if (!tableCheck) {
+      console.log("Database tables not found. Initializing...");
+      const createTablesSQL = fs.readFileSync(
+        path.join(__dirname, "../server/db/create_tables.sql"),
+        "utf8"
+      );
+      db.exec(createTablesSQL);
+      console.log("Tables created successfully");
+      
+      // Populate with initial data
+      try {
+        const populateSQL = fs.readFileSync(
+          path.join(__dirname, "../server/db/populate_data.sql"),
+          "utf8"
+        );
+        db.exec(populateSQL);
+        console.log("Initial data populated successfully");
+      } catch (populateErr) {
+        console.error("Error populating data:", populateErr);
+        // Continue even if populate fails
+      }
+    }
+  } catch (err) {
+    console.error("Database initialization error:", err);
+    // Don't throw - let the app continue, tables will be created on first admin action
+  }
+}
+
+// Initialize on startup
+initializeDatabaseIfNeeded();
 
 // ====== AUTH MIDDLEWARE ======
 function requireLogin(req, res, next) {
@@ -133,6 +174,18 @@ app.post("/api/login", loginLimiter, async (req, res) => {
     const empIDNum = parseInt(empID, 10);
     if (isNaN(empIDNum) || empIDNum <= 0) {
       return res.status(400).json({ error: "Invalid Employee ID" });
+    }
+
+    // Ensure database is initialized (fallback check)
+    try {
+      db.prepare("SELECT 1 FROM Employee LIMIT 1").get();
+    } catch (tableErr) {
+      if (tableErr.code === 'SQLITE_ERROR' && tableErr.message.includes('no such table')) {
+        console.log("Tables missing during login, initializing...");
+        initializeDatabaseIfNeeded();
+      } else {
+        throw tableErr;
+      }
     }
 
     // Get user from database
