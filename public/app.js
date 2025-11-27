@@ -1,9 +1,7 @@
 // Use relative API path for Vercel deployment
 const API_BASE = '/api';
 
-// Rest of your app.js code...
-// Tab Navigation
-document.addEventListener('DOMContentLoaded', () => {
+ocument.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -87,7 +85,6 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         throw error;
     }
 }
-
 // ========== PATIENTS ==========
 async function loadPatients() {
     try {

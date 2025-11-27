@@ -645,3 +645,74 @@ tbody tr:last-child td {
     }
 }
 
+/* Add this to the end of your styles.css file */
+
+.welcome-message {
+    margin-bottom: 40px;
+    animation: fadeIn 0.5s ease;
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-card h2 {
+    color: white;
+    border: none;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    padding-bottom: 0;
+}
+
+.welcome-card p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    opacity: 0.95;
+}
+
+.welcome-card ol {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px 25px 25px 45px;
+    border-radius: 12px;
+    margin: 25px 0;
+    backdrop-filter: blur(10px);
+}
+
+.welcome-card ol li {
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.welcome-card ol li:last-child {
+    margin-bottom: 0;
+}
+
+.welcome-card ol li strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+.welcome-card .note {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 4px solid rgba(255, 255, 255, 0.5);
+    margin-top: 25px;
+    font-size: 0.95rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
